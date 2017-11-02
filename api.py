@@ -29,8 +29,24 @@ class LinkAPI(object):
         if data['error_code'] == 0:
             return True
 
-if __name__ == '__main__':
-    api = LinkAPI()
-    url = "https://mp.weixin.qq.com/s?src=11&timestamp=1509342128&ver=483&signature=DkbUCG3rOoMiJqzkInk2hdhvRSILVWgxHJdGZgIOv0JQyx2q*-mz*OowyHHYg2PRG2nHbLLvJPU7NEi0XUz761VI7KgNqid-Y-IkNjhgUIrYYcYYWyZZ7d-9u7abCDQs&new=1"
-    data = api.temporaryToPermant(url)
 
+import requests
+
+class E7liuxueSQL(object):
+
+    _TOKEN = "123456789abcdefg"
+    _ROOT_URL = "http://data.100zhaosheng.com/api/"
+
+    def push(self, url, data):
+        headers = {
+            'API-AUTH-TOKEN': self._TOKEN,
+            'Accept-Language': 'zh-CN,en,*'
+        }
+        response = requests.post(url, data=data, headers=headers)
+        return response
+
+    def pushToWeixin(self, item):
+        return self.push(url=self._ROOT_URL + 'weixin', data=item)
+
+    def pushToWeibo(self, item):
+        return self.push(url=self._ROOT_URL + 'weibo', data=item)

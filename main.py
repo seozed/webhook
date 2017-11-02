@@ -3,9 +3,12 @@ from flask import request, Flask
 import config
 import json
 from pipeline import MongoPipeline
+import api
 
 app = Flask(__name__)
 db = MongoPipeline(config.MONGO_URI, config.MONGO_DATABASE)
+dbApi = api.E7liuxueSQL()
+
 
 @app.route('/record_weixin', methods=['POST'])
 def record_weixin():
@@ -29,10 +32,19 @@ def save_data(data, collection=None):
 
 def tmpLinkToPermantLink(url):
 
-    from api import LinkAPI
-    link = LinkAPI()
+
+    link = api.LinkAPI()
     new_url = link.temporaryToPermant(url)
     return new_url
+
+@app.route('/record_weibo', methods=['POST'])
+def record_weibo():
+
+    formData = request.form
+    item = json.loads(formData['data'])
+    item['source_content'] = json.dumps(item.pop("origin"))
+    response = dbApi.pushToWeibo(item)
+    return formData['data_key']
 
 
 if __name__ == '__main__':
