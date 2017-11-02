@@ -4,10 +4,26 @@ import config
 import json
 from pipeline import MongoPipeline
 import api
+import logging
 
 app = Flask(__name__)
 db = MongoPipeline(config.MONGO_URI, config.MONGO_DATABASE)
 dbApi = api.E7liuxueSQL()
+
+
+# log settings
+app.debug = True
+handler = logging.FileHandler('flask.log')
+app.logger.addHandler(handler)
+logging_format = logging.Formatter('%(asctime)s - %(levelname)s - %(filename)s - %(funcName)s - %(lineno)s - %(message)s')
+handler.setFormatter(logging_format)
+
+
+
+@app.route('/')
+def root():
+    app.logger.info('info log')
+    return 'hello'
 
 
 @app.route('/record_weixin', methods=['POST'])
@@ -41,14 +57,22 @@ def tmpLinkToPermantLink(url):
 def record_weibo():
 
     formData = request.form
+    app.logger.info("start process url:%s", formData['url'])
+
     try:
         item = json.loads(formData['data'])
         item['source_content'] = json.dumps(item.pop("origin"))
+        item['pics'] = json.dumps(item.pop("pics"))
+
         response = dbApi.pushToWeibo(item)
+        app.logger.info("push success! response:%s", response.text)
+
+    except Exception as e:
+        app.logger.error(e)
 
     finally:
         return formData['data_key']
 
-
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=config.PORT)
+
