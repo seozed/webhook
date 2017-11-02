@@ -41,10 +41,13 @@ def tmpLinkToPermantLink(url):
 def record_weibo():
 
     formData = request.form
-    item = json.loads(formData['data'])
-    item['source_content'] = json.dumps(item.pop("origin"))
-    response = dbApi.pushToWeibo(item)
-    return formData['data_key']
+    try:
+        item = json.loads(formData['data'])
+        item['source_content'] = json.dumps(item.pop("origin"))
+        response = dbApi.pushToWeibo(item)
+
+    finally:
+        return formData['data_key']
 
 
 if __name__ == '__main__':
